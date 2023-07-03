@@ -50,3 +50,11 @@ async function getBook({ bookId }) {
 
   return results.rows[0];
 }
+
+async function addBook({ id, author, price, description, year_published }) {
+  if (typeof id !== 'string' || id.length === 0)
+    throw new Error('Id must be a string and longer than 0.');
+}
+
+if (typeof author !== 'string' || author.length === 0)
+  throw new Error('Author must be a string and longer than 0.');
