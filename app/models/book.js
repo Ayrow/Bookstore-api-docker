@@ -115,3 +115,41 @@ async function addBook({ id, author, price, description, year_published }) {
 
   return resp;
 }
+
+async function updateBook({ id, newAttributes }) {
+  if (typeof id !== 'string' || id.length === 0)
+    throw new InvalidArgumentError('Id must be a string and longer than 0.');
+
+  validate(
+    typeof newAttributes !== 'object',
+    'New attributes must be provided as object'
+  );
+
+  const validAttributes = Object.keys(newAttributes).filter((element) =>
+    bookAttributesArray.includes(element)
+  );
+  validate(
+    validAttributes.length === 0,
+    'At least one valid attribute to update must be provided'
+  );
+
+  let query = `update book set `;
+  let bindVariables = [id];
+  validAttributes.forEach((attribute, i, keys) => {
+    makeValidation(attribute, newAttributes[attribute]);
+    query = query + ` ${attribute} = $${i + 2}`;
+    bindVariables.push(newAttributes[attribute]);
+    if (i < keys.length - 1) query = query + ', ';
+  });
+  query = query + ` where id = $1 `;
+
+  let resp;
+  try {
+    resp = await client.query(query, bindVariables);
+  } catch (e) {
+    console.log(e);
+    return undefined;
+  }
+
+  return resp;
+}
