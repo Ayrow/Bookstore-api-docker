@@ -1,7 +1,7 @@
 drop table if exists book;
 
 create table book (
-  id character(36) primary key,
+  id varchar(36) primary key,
   author varchar(255) not null,
   price integer not null,
   description text,
