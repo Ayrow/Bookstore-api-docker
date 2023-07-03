@@ -75,7 +75,7 @@ function makeValidation(attribute, value) {
 
     case 'description':
       validate(
-        typeof value !== 'string' || value !== undefined,
+        typeof value !== 'string' && value !== undefined,
         'Description must be a string if exists'
       );
       break;
