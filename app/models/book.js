@@ -153,3 +153,26 @@ async function updateBook({ id, newAttributes }) {
 
   return resp;
 }
+
+async function deleteBook({ bookId }) {
+  if (typeof bookId !== 'string') return undefined;
+
+  let resp;
+
+  try {
+    resp = await client.query(
+      `
+    delete from book
+    where id = $1
+    `,
+      [bookId]
+    );
+  } catch (e) {
+    console.log(e);
+    return undefined;
+  }
+
+  return resp;
+}
+
+module.exports = { getBook, getBooks, addBook, updateBook, deleteBook };
