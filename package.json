@@ -1,0 +1,21 @@
+{
+  "name": "bookstore-api-docker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --recursive --exit",
+    "dev": "nodemon --legacy-watch app/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.3.7",
+    "express": "^4.18.2",
+    "mocha": "^10.2.0"
+  }
+}
