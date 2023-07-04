@@ -12,16 +12,58 @@ const bookAttributesArray = [
 const insertBookAttributes = bookAttributesArray.slice(0, -1).join(', ');
 const selectBookAttributes = bookAttributesArray.join(', ');
 
-async function getBooks() {
-  const query = `
+async function getBooks({ limit, offset, sortBy, desc }) {
+  validate(
+    limit !== undefined && isNaN(+limit) === true,
+    'Limit must be a number if defined'
+  );
+
+  validate(
+    offset !== undefined && isNaN(+offset) === true,
+    'Offset must be a number if defined'
+  );
+
+  validate(
+    sortBy !== undefined && bookAttributesArray.includes(sortBy) === false,
+    'sortBy must be a book attribute'
+  );
+
+  validate(
+    desc !== undefined && typeof desc !== 'boolean',
+    'desc must be a boolean if defined'
+  );
+
+  let query = `
     select ${selectBookAttributes}
     from book
   `;
 
+  let bindVariables = [];
+
+  if (sortBy !== undefined) {
+    query = query + ` ORDER BY ${sortBy}`;
+  } else {
+    query = query * ` ORDER BY added_dttm`;
+  }
+
+  if (desc !== false) {
+    query = query + ` desc`;
+  }
+
+  if (limit !== undefined) {
+    query = query + ` limit $${bindVariables.length + 1}`;
+    bindVariables.push(+limit);
+  }
+
+  if (offset !== undefined) {
+    query = query + ` offset $${bindVariables.length + 1}`;
+    bindVariables.push(+offset);
+  }
+
   let results;
 
   try {
-    results = await client.query(query);
+    results = await client.query(query, bindVariables);
   } catch (e) {
     console.log(e);
     return undefined;
