@@ -193,4 +193,122 @@ describe('Testing models book', () => {
       });
     });
   });
+
+  describe('Testing updateBook', () => {
+    const testingBook = {
+      id: 'TestingBook1',
+      author: 'Testing author',
+      price: 12,
+      description: 'Testing description',
+      year_published: 2000,
+    };
+
+    before(async () => {
+      await cleanup(testingBook.id);
+      await addBook(testingBook);
+    });
+
+    after(async () => {
+      await cleanup(testingBook.id);
+    });
+
+    describe('Testing updating book correctly', () => {
+      const newPrice = 199;
+      it('Correct response', async () => {
+        const resp = await updateBook({
+          id: testingBook.id,
+          newAttributes: {
+            price: newPrice,
+          },
+        });
+        expect(resp.rowCount).to.equal(1);
+      });
+
+      it('Book in the db has an updated price', async () => {
+        const book = await getBook({ bookId: testingBook.id });
+        expect(book.price).to.equal(newPrice);
+      });
+    });
+
+    describe('Testing updating with empty attributes', () => {
+      it('Correct error', async () => {
+        let err = 0;
+        try {
+          await updateBook({
+            id: testingBook.id,
+            newAttributes: {},
+          });
+        } catch (e) {
+          err = 1;
+          expect(e instanceof InvalidArgumentError);
+        }
+        expect(err).to.equal(1);
+      });
+    });
+
+    describe('Update with a parameter that does not exist', () => {
+      before(async () => {
+        await cleanup(testingBook.id);
+        await addBook(testingBook);
+      });
+
+      it('Correct error', async () => {
+        let err = 0;
+        try {
+          await updateBook({
+            id: testingBook.id,
+            newAttributes: {
+              weirdAttribute: 1234,
+            },
+          });
+        } catch (e) {
+          err = 1;
+          expect(e instanceof InvalidArgumentError);
+        }
+        expect(err).to.equal(1);
+      });
+
+      it('Book remains unchanged', async () => {
+        const book = await getBook({ bookId: testingBook.id });
+        delete book.added_dttm;
+        expect(book).to.deep.equal(testingBook);
+      });
+    });
+
+    describe('Update with multiple parameters and some that do not exist', () => {
+      const newPrice = 299;
+      const newAuthor = 'New Author';
+      const newDescription = 'New description';
+
+      before(async () => {
+        await cleanup(testingBook.id);
+        await addBook(testingBook);
+      });
+
+      after(async () => {
+        await cleanup(testingBook.id);
+      });
+
+      it('Correct response', async () => {
+        const resp = await updateBook({
+          id: testingBook.id,
+          newAttributes: {
+            price: newPrice,
+            author: newAuthor,
+            description: newDescription,
+            weirdAttribute: 1234,
+          },
+        });
+        expect(resp.rowCount).to.equal(1);
+      });
+
+      it('Book attributes were properly updated', async () => {
+        const book = await getBook({ bookId: testingBook.id });
+        expect(book.price).to.equal(newPrice);
+        expect(book.author).to.equal(newAuthor);
+        expect(book.description).to.equal(newDescription);
+        expect(book.year_published).to.equal(testingBook.year_published);
+      });
+    });
+  });
 });
