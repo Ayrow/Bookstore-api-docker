@@ -311,4 +311,54 @@ describe('Testing models book', () => {
       });
     });
   });
+
+  describe('Testing deleteBook', () => {
+    const testingBook = {
+      id: 'TestingBook1',
+      author: 'Testing author',
+      price: 12,
+      description: 'Testing description',
+      year_published: 2000,
+    };
+
+    before(async () => {
+      await cleanup(testingBook.id);
+      await addBook(testingBook);
+    });
+
+    after(async () => {
+      await cleanup(testingBook.id);
+    });
+
+    describe('Correc delete', () => {
+      it('Correct response', async () => {
+        const resp = await deleteBook({ bookId: testingBook.id });
+        expect(resp.rowCount).to.equal(1);
+      });
+
+      it('Book does not exist', async () => {
+        const book = await getBook({ bookId: testingBook.id });
+        expect(book).to.equal(null);
+      });
+    });
+
+    describe('Delete book that does not exist', () => {
+      async function getCount() {
+        const count = await client.query(
+          `
+            select count(*) as count
+            from book
+          `
+        );
+        return count.rows[0].count;
+      }
+
+      it('Count before deleting is equal to count after deleting', async () => {
+        const countBefore = await getCount();
+        await deleteBook({ bookId: 'doesnotexist' });
+        const countAfter = await getCount();
+        expect(countAfter).to.equal(countBefore);
+      });
+    });
+  });
 });
