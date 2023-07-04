@@ -158,4 +158,39 @@ describe('Testing models book', () => {
       itTitle: 'Correct error type',
     });
   });
+
+  describe('Testing getBook', () => {
+    const testingBook = {
+      id: 'TestingBook1',
+      author: 'Testing author',
+      price: 12,
+      description: 'Testing description',
+      year_published: 2000,
+    };
+
+    before(async () => {
+      await cleanup(testingBook.id);
+      await cleanup('testingBookThatDoesNotExist');
+    });
+
+    after(async () => {
+      await cleanup(testingBook.id);
+    });
+
+    describe('Testing getting correct book', () => {
+      it('Returned book is equal to testing book', async () => {
+        await addBook(testingBook);
+        const book = await getBook({ bookId: testingBook.id });
+        delete book.added_dttm;
+        expect(book).to.deep.equal(testingBook);
+      });
+    });
+
+    describe('Testing getting book that does not exist', () => {
+      it('Null is returned', async () => {
+        const book = await getBook({ bookId: 'testingBookThatDoesNotExist' });
+        expect(book).to.equal(null);
+      });
+    });
+  });
 });
