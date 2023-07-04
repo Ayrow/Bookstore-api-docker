@@ -330,7 +330,7 @@ describe('Testing models book', () => {
       await cleanup(testingBook.id);
     });
 
-    describe('Correc delete', () => {
+    describe('Correct delete', () => {
       it('Correct response', async () => {
         const resp = await deleteBook({ bookId: testingBook.id });
         expect(resp.rowCount).to.equal(1);
@@ -358,6 +358,76 @@ describe('Testing models book', () => {
         await deleteBook({ bookId: 'doesnotexist' });
         const countAfter = await getCount();
         expect(countAfter).to.equal(countBefore);
+      });
+    });
+  });
+
+  describe('Testing getBooks', () => {
+    const testingBook1 = {
+      id: 'TestingBook1',
+      author: 'Testing author 1',
+      price: 122,
+      description: 'Testing description',
+      year_published: 2000,
+    };
+    const testingBook2 = {
+      id: 'TestingBook2',
+      author: 'Testing author 2',
+      price: 142,
+      year_published: 2000,
+    };
+    const testingBook3 = {
+      id: 'TestingBook3',
+      author: 'Testing author 3',
+      price: 112,
+      description: 'Testing description',
+      year_published: 2000,
+    };
+
+    before(async () => {
+      await Promise.all([
+        cleanup(testingBook1.id),
+        cleanup(testingBook2.id),
+        cleanup(testingBook3.id),
+      ]);
+      await Promise.all([
+        addBook(testingBook1),
+        addBook(testingBook2),
+        addBook(testingBook3),
+      ]);
+    });
+
+    after(async () => {
+      await Promise.all([
+        cleanup(testingBook1.id),
+        cleanup(testingBook2.id),
+        cleanup(testingBook3.id),
+      ]);
+    });
+
+    describe('Testing if books are returned', () => {
+      let books;
+      before(async () => {
+        books = await getBooks();
+      });
+
+      it('Book1 same as testing', async () => {
+        const book1 = books.filter((book) => book.id === testingBook1.id)[0];
+        delete book1.added_dttm;
+        expect(book1).to.deep.equal(testingBook1);
+      });
+
+      it('Book2 same as testing', async () => {
+        const book2 = books.filter((book) => book.id === testingBook2.id)[0];
+        delete book2.added_dttm;
+        delete book2.description;
+        expect(book2).to.deep.equal(testingBook2);
+      });
+
+      it('Book3 same as testing', async () => {
+        const book3 = books.filter((book) => book.id === testingBook3.id)[0];
+        delete book3.added_dttm;
+        expect(book3).to.deep.equal(testingBook3);
       });
     });
   });
