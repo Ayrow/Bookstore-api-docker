@@ -430,5 +430,67 @@ describe('Testing models book', () => {
         expect(book3).to.deep.equal(testingBook3);
       });
     });
+
+    describe('Testing limit', () => {
+      it('Correct number of results was returned', async () => {
+        const limit = 2;
+        const books = await getBooks({
+          limit,
+        });
+        expect(books.length).to.equal(limit);
+      });
+    });
+
+    describe('Testing sorting ascending', () => {
+      it('Lowest price is returned', async () => {
+        const books = await getBooks({
+          sortBy: 'price',
+          desc: false,
+        });
+        const minPrice = await client.query(`
+          select min(price) as minPrice
+          from book
+        `);
+        expect(books[0].price).to.equal(minPrice.rows[0].minPrice);
+      });
+    });
+
+    describe('Testing sorting descending', () => {
+      it('Lowest price is returned', async () => {
+        const books = await getBooks({
+          sortBy: 'price',
+          desc: true,
+        });
+        const maxPrice = await client.query(`
+          select max(price) as maxPrice
+          from book
+        `);
+        expect(books[0].price).to.equal(maxPrice.rows[0].maxPrice);
+      });
+    });
+
+    describe('Testing offset', () => {
+      const limit = 1;
+      it('Correct year_published', async () => {
+        const books = await getBooks({
+          limit,
+          sortBy: 'year_published',
+          desc: true,
+          offset: 1,
+        });
+        const yearPublished = await client.query(
+          `
+          select year_published
+          from book
+          order by year_published desc
+          limit $1 offset 2
+          `,
+          [limit]
+        );
+        expect(books[0].year_published).to.equal(
+          yearPublished.rows[0].year_published
+        );
+      });
+    });
   });
 });
