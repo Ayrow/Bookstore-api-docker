@@ -96,4 +96,30 @@ describe('Testing http endpoint', () => {
       });
     });
   });
+
+  describe('Testing GET book', () => {
+    describe('Testing getting book that exist', () => {
+      it('fetched book is equal to testing book', (done) => {
+        chai
+          .request(app)
+          .get(`/book/$(testingBook.id)`)
+          .end((_err, res) => {
+            delete res.body.added_dttm;
+            expect(res.body).to.deep.equal(testingBook1);
+          });
+      });
+    });
+
+    describe('Testing getting book that does not exist', () => {
+      it('Correct response code', (done) => {
+        chai
+          .request(app)
+          .get(`/book/doesnotexist`)
+          .end((_err, res) => {
+            expect(res).to.have.status(404);
+            done();
+          });
+      });
+    });
+  });
 });
