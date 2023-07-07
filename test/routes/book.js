@@ -220,4 +220,75 @@ describe('Testing http endpoint', () => {
       });
     });
   });
+
+  describe('Testing PATCH book', () => {
+    describe('Updating an existing book', () => {
+      it('Correct response code', (done) => {
+        const newPrice = 222;
+        const newDescription = 'This is an updated description';
+        chai
+          .request(app)
+          .patch(`/book/${testingBook.id}`)
+          .send({
+            price: newPrice,
+            description: newDescription,
+          })
+          .end((_err, res) => {
+            expect(res).to.have.status(204);
+            testingBook1.price = newPrice;
+            testingBook1.price = newDescription;
+            done();
+          });
+      });
+
+      it('Book is equal to udpated book', async () => {
+        const book = await getBook({ bookId: testingBook1.id });
+        delete book.added_dttm;
+        expect(book).to.deep.equal(testingBook1);
+      });
+    });
+
+    describe('Testing updating a book that does not exist', () => {
+      it('Correct response code', (done) => {
+        const newPrice = 222;
+        const newDescription = 'This is an updated description';
+        chai
+          .request(app)
+          .patch(`/book/doesnotexist`)
+          .send({
+            price: newPrice,
+            description: newDescription,
+          })
+          .end((_err, res) => {
+            expect(res).to.have.status(404);
+            testingBook1.price = newPrice;
+            testingBook1.price = newDescription;
+            done();
+          });
+      });
+    });
+
+    describe('Testing updating id', () => {
+      it('Correct response code', (done) => {
+        const newYear_published = 2222;
+        chai
+          .request(app)
+          .patch(`/book/${testingBook1.id}`)
+          .send({
+            year_published: newYear_published,
+            id: 'changedId',
+          })
+          .end((_err, res) => {
+            expect(res).to.have.status(204);
+            testingBook1.year_published = newYear_published;
+            done();
+          });
+      });
+
+      it('Id remains unchanged', async () => {
+        const book = await getBook({ bookId: testingBook1.id });
+        expect(book).to.not.equal(null);
+      });
+    });
+  });
 });

@@ -76,7 +76,7 @@ router.patch('/:bookId', async (req, res) => {
   let resp;
 
   try {
-    resp = await updateBook({ bookId });
+    resp = await updateBook({ bookId, newAttributes });
   } catch (e) {
     console.log(e);
     if (e instanceof InvalidArgumentError)
