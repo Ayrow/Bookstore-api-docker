@@ -1,6 +1,12 @@
 const { v4: uuidv4 } = require('uuid');
 const InvalidArgumentError = require('../error');
-const { getBooks, getBook, addBook, updateBook } = require('../models/book');
+const {
+  getBooks,
+  getBook,
+  addBook,
+  updateBook,
+  deleteBook,
+} = require('../models/book');
 
 const router = require('express').Router();
 
@@ -64,18 +70,6 @@ router.patch('/:bookId', async (req, res) => {
   if (bookId === undefined)
     return res.status(404).json({ message: 'BookId is missing' });
 
-  let book;
-
-  try {
-    book = await getBook({ bookId });
-  } catch (e) {
-    console.log(e);
-    return res.sendStatus(500);
-  }
-
-  if (book === undefined) return res.sendStatus(500);
-  if (book === null) return res.sendStatus(404);
-
   const newAttributes = req.body;
   delete newAttributes.id;
 
@@ -89,11 +83,24 @@ router.patch('/:bookId', async (req, res) => {
       return resp.sendStatus(400).json({ message: e.message });
     return res.sendStatus(500);
   }
-
+  if (resp.rowCount === 0) return res.sendStatus(404);
   if (resp === undefined) return res.sendStatus(500);
-  resp.sendStatus(204);
+  res.sendStatus(204);
 });
 
-router.delete('/', async (req, res) => {});
+router.delete('/:bookId', async (req, res) => {
+  const bookId = req.params.bookId;
+  let resp;
+  try {
+    resp = await deleteBook({ bookId });
+  } catch (e) {
+    console.log(e);
+    return res.sendStatus(500);
+  }
+  if (resp.rowCount === 0) return res.sendStatus(404);
+
+  if (resp === undefined) return res.sendStatus(500);
+  res.sendStatus(204);
+});
 
 module.exports = router;
