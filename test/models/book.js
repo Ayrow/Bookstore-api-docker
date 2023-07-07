@@ -216,7 +216,7 @@ describe('Testing models book', () => {
       const newPrice = 199;
       it('Correct response', async () => {
         const resp = await updateBook({
-          id: testingBook.id,
+          bookId: testingBook.id,
           newAttributes: {
             price: newPrice,
           },
@@ -235,7 +235,7 @@ describe('Testing models book', () => {
         let err = 0;
         try {
           await updateBook({
-            id: testingBook.id,
+            bookId: testingBook.id,
             newAttributes: {},
           });
         } catch (e) {
@@ -256,7 +256,7 @@ describe('Testing models book', () => {
         let err = 0;
         try {
           await updateBook({
-            id: testingBook.id,
+            bookId: testingBook.id,
             newAttributes: {
               weirdAttribute: 1234,
             },
@@ -291,7 +291,7 @@ describe('Testing models book', () => {
 
       it('Correct response', async () => {
         const resp = await updateBook({
-          id: testingBook.id,
+          bookId: testingBook.id,
           newAttributes: {
             price: newPrice,
             author: newAuthor,

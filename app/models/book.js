@@ -158,8 +158,8 @@ async function addBook({ id, author, price, description, year_published }) {
   return resp;
 }
 
-async function updateBook({ id, newAttributes }) {
-  if (typeof id !== 'string' || id.length === 0)
+async function updateBook({ bookId, newAttributes }) {
+  if (typeof bookId !== 'string' || bookId.length === 0)
     throw new InvalidArgumentError('Id must be a string and longer than 0.');
 
   validate(
@@ -176,7 +176,7 @@ async function updateBook({ id, newAttributes }) {
   );
 
   let query = `update book set `;
-  let bindVariables = [id];
+  let bindVariables = [bookId];
   validAttributes.forEach((attribute, i, keys) => {
     makeValidation(attribute, newAttributes[attribute]);
     query = query + ` ${attribute} = $${i + 2}`;

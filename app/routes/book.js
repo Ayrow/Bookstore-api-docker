@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const InvalidArgumentError = require('../error');
-const { getBooks, getBook, addBook } = require('../models/book');
+const { getBooks, getBook, addBook, updateBook } = require('../models/book');
 
 const router = require('express').Router();
 
@@ -58,8 +58,42 @@ router.post('/', async (req, res) => {
   res.status(201).json({ message: 'Book has been created' });
 });
 
-router.patch('/', (req, res) => {});
+router.patch('/:bookId', async (req, res) => {
+  const bookId = req.params.bookId;
 
-router.delete('/', (req, res) => {});
+  if (bookId === undefined)
+    return res.status(404).json({ message: 'BookId is missing' });
+
+  let book;
+
+  try {
+    book = await getBook({ bookId });
+  } catch (e) {
+    console.log(e);
+    return res.sendStatus(500);
+  }
+
+  if (book === undefined) return res.sendStatus(500);
+  if (book === null) return res.sendStatus(404);
+
+  const newAttributes = req.body;
+  delete newAttributes.id;
+
+  let resp;
+
+  try {
+    resp = await updateBook({ bookId });
+  } catch (e) {
+    console.log(e);
+    if (e instanceof InvalidArgumentError)
+      return resp.sendStatus(400).json({ message: e.message });
+    return res.sendStatus(500);
+  }
+
+  if (resp === undefined) return res.sendStatus(500);
+  resp.sendStatus(204);
+});
+
+router.delete('/', async (req, res) => {});
 
 module.exports = router;
