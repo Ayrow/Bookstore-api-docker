@@ -43,7 +43,12 @@ describe('Testing http endpoint', () => {
   }
 
   function addBook({ testingBook, endCallback }) {
-    chai.request(app).post('/book').send(testingBook).end(endCallback);
+    chai
+      .request(app)
+      .post('/book')
+      .send(testingBook)
+      .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
+      .end(endCallback);
   }
 
   describe('Testing POST book', () => {
@@ -108,6 +113,7 @@ describe('Testing http endpoint', () => {
         chai
           .request(app)
           .get(`/book/$(testingBook.id)`)
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             delete res.body.added_dttm;
             expect(res.body).to.deep.equal(testingBook1);
@@ -120,6 +126,7 @@ describe('Testing http endpoint', () => {
         chai
           .request(app)
           .get(`/book/doesnotexist`)
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             expect(res).to.have.status(404);
             done();
@@ -141,6 +148,7 @@ describe('Testing http endpoint', () => {
         chai
           .request(app)
           .get(`/book?limit=2`)
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             expect(res.body.length).to.equal(2);
             done();
@@ -164,6 +172,7 @@ describe('Testing http endpoint', () => {
           chai
             .request(app)
             .get(`/book?sortby=author&limit=1`)
+            .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
             .end((_err, res) => {
               expect(res.body.length).to.equal(1);
               expect(res.body[0].author).to.equal(author);
@@ -187,6 +196,7 @@ describe('Testing http endpoint', () => {
           chai
             .request(app)
             .get(`/book?sortby=author&limit=2&desc`)
+            .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
             .end((_err, res) => {
               expect(res.body.length).to.equal(2);
               expect(res.body[0].author).to.equal(author);
@@ -213,6 +223,7 @@ describe('Testing http endpoint', () => {
         chai
           .request(app)
           .get(`/book?sortBy=price&offset=1&limit=1`)
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             expect(res.body[0].price).to.equal(price);
             done();
@@ -233,6 +244,7 @@ describe('Testing http endpoint', () => {
             price: newPrice,
             description: newDescription,
           })
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             expect(res).to.have.status(204);
             testingBook1.price = newPrice;
@@ -259,6 +271,7 @@ describe('Testing http endpoint', () => {
             price: newPrice,
             description: newDescription,
           })
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             expect(res).to.have.status(404);
             testingBook1.price = newPrice;
@@ -278,6 +291,7 @@ describe('Testing http endpoint', () => {
             year_published: newYear_published,
             id: 'changedId',
           })
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             expect(res).to.have.status(204);
             testingBook1.year_published = newYear_published;
@@ -298,6 +312,7 @@ describe('Testing http endpoint', () => {
         chai
           .request(app)
           .delete(`/book/${testingBook1.id}`)
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             expect(res).to.have.status(204);
             done();
@@ -325,6 +340,7 @@ describe('Testing http endpoint', () => {
         chai
           .request(app)
           .delete(`/book/doesnotexist`)
+          .set('Authorization', `Basic ${process.env.TESTING_API_KEY}`)
           .end((_err, res) => {
             expect(res).to.have.status(404);
             done();

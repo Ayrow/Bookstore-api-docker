@@ -21,3 +21,5 @@ async function checkApiKey(req, res, next) {
 
   next();
 }
+
+module.exports = checkApiKey;
