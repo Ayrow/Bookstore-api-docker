@@ -1,5 +1,6 @@
+const { v4: uuidv4 } = require('uuid');
 const InvalidArgumentError = require('../error');
-const { getBooks, getBook } = require('../models/book');
+const { getBooks, getBook, addBook } = require('../models/book');
 
 const router = require('express').Router();
 
@@ -39,7 +40,23 @@ router.get('/:bookId', async (req, res) => {
   res.json(book);
 });
 
-router.post('/', (req, res) => {});
+router.post('/', async (req, res) => {
+  const { author, price, description, year_published } = req.body;
+
+  let resp;
+  const id = uuidv4();
+  try {
+    resp = await addBook({ id, author, price, description, year_published });
+  } catch (e) {
+    console.log(e);
+    if (e instanceof InvalidArgumentError)
+      return resp.sendStatus(400).json({ message: e.message });
+    return res.sendStatus(500);
+  }
+
+  if (resp === undefined) return res.sendStatus(500);
+  res.status(201).json({ message: 'Book has been created' });
+});
 
 router.patch('/', (req, res) => {});
 
