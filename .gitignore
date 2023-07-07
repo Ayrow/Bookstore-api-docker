@@ -1,3 +1,4 @@
 node_modules
 .env
 api_keyTestData.sql
+test.rest
