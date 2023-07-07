@@ -42,6 +42,10 @@ describe('Testing http endpoint', () => {
     );
   }
 
+  after(async () => {
+    await cleanup();
+  });
+
   function addBook({ testingBook, endCallback }) {
     chai
       .request(app)
@@ -353,6 +357,33 @@ describe('Testing http endpoint', () => {
           from book
         `);
         expect(resp.rows[0].count).to.equal(countBefore);
+      });
+    });
+  });
+
+  describe('Testing API Key', () => {
+    describe('Testing request without a key', () => {
+      it('Correct response code', (done) => {
+        chai
+          .request(app)
+          .get('/book')
+          .end((_err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+    });
+
+    describe('Testing request with invalid key', () => {
+      it('Correct response code', (done) => {
+        chai
+          .request(app)
+          .get('/book')
+          .set('Authorization', 'Basic doesnotexist1234')
+          .end((_err, res) => {
+            expect(res).to.have.status(401);
+            done();
+          });
       });
     });
   });
