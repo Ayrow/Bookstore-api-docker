@@ -1,5 +1,5 @@
 const InvalidArgumentError = require('../error');
-const { getBooks } = require('../models/book');
+const { getBooks, getBook } = require('../models/book');
 
 const router = require('express').Router();
 
@@ -22,7 +22,22 @@ router.get('/', async (req, res) => {
   res.json(books);
 });
 
-router.get('/:bookId', (req, res) => {});
+router.get('/:bookId', async (req, res) => {
+  const bookId = req.params.bookId;
+
+  let book;
+  try {
+    book = await getBook({ bookId });
+  } catch (e) {
+    console.log(e);
+    return res.sendStatus(500);
+  }
+
+  if (book === undefined) return res.sendStatus(500);
+  if (book === null) return res.sendStatus(400);
+
+  res.json(book);
+});
 
 router.post('/', (req, res) => {});
 
