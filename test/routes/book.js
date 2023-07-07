@@ -291,4 +291,53 @@ describe('Testing http endpoint', () => {
       });
     });
   });
+
+  describe('Testing DELETE book', () => {
+    describe('Deleting an existing book', () => {
+      it('Correct response code', (done) => {
+        chai
+          .request(app)
+          .delete(`/book/${testingBook1.id}`)
+          .end((_err, res) => {
+            expect(res).to.have.status(204);
+            done();
+          });
+      });
+
+      it('Deleting book that does not exist', async () => {
+        const book = await getBook({ bookId: testingBook1.id });
+        expect(book).to.equal(null);
+      });
+    });
+
+    describe('Deleting a book that does not exist', () => {
+      let countBefore;
+
+      before(async () => {
+        const resp = await client.query(`
+          select count(*) as count
+          from book
+        `);
+        countBefore = resp.rows[0].count;
+      });
+
+      it('Correct response code', (done) => {
+        chai
+          .request(app)
+          .delete(`/book/doesnotexist`)
+          .end((_err, res) => {
+            expect(res).to.have.status(404);
+            done();
+          });
+      });
+
+      it('Count in the book table remains unchanged', async () => {
+        const resp = await client.query(`
+          select count(*) as count
+          from book
+        `);
+        expect(resp.rows[0].count).to.equal(countBefore);
+      });
+    });
+  });
 });
