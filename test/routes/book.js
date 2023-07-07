@@ -17,13 +17,18 @@ describe('Testing http endpoint', () => {
   };
   const testingBook2 = {
     author: 'Testing author 2',
-    price: 142,
     year_published: 2000,
   };
   const testingBook3 = {
     author: 'Testing author 3',
     price: 112,
     description: 'Testing description',
+    year_published: 2000,
+  };
+  const testingBook4 = {
+    author: 'Testing author 4',
+    price: 340,
+    description: 'Testing description 4',
     year_published: 2000,
   };
 
@@ -117,6 +122,99 @@ describe('Testing http endpoint', () => {
           .get(`/book/doesnotexist`)
           .end((_err, res) => {
             expect(res).to.have.status(404);
+            done();
+          });
+      });
+    });
+  });
+
+  describe('Testing GET multiple books', () => {
+    before(async () => {
+      Promise.all(
+        addBook({ testingBook: testingBook3 }),
+        addBook({ testingBook: testingBook4 })
+      );
+    });
+
+    describe('Test limit', () => {
+      it('Correct number of books fetched', (done) => {
+        chai
+          .request(app)
+          .get(`/book?limit=2`)
+          .end((_err, res) => {
+            expect(res.body.length).to.equal(2);
+            done();
+          });
+      });
+    });
+
+    describe('Test sortBy', () => {
+      describe('Testing ascending', () => {
+        let author;
+        before(async () => {
+          const resp = await client.query(`
+          select author
+          from book
+          order by author
+          `);
+          author = resp.rows[0].author;
+        });
+
+        it('Author is equal to selected author', (done) => {
+          chai
+            .request(app)
+            .get(`/book?sortby=author&limit=1`)
+            .end((_err, res) => {
+              expect(res.body.length).to.equal(1);
+              expect(res.body[0].author).to.equal(author);
+              done();
+            });
+        });
+      });
+
+      describe('Testing descending', () => {
+        let author;
+        before(async () => {
+          const resp = await client.query(`
+          select author
+          from book
+          order by author desc
+          `);
+          author = resp.rows[0].author;
+        });
+
+        it('Author is equal to selected author', (done) => {
+          chai
+            .request(app)
+            .get(`/book?sortby=author&limit=2&desc`)
+            .end((_err, res) => {
+              expect(res.body.length).to.equal(2);
+              expect(res.body[0].author).to.equal(author);
+              done();
+            });
+        });
+      });
+    });
+
+    describe('Test offset', () => {
+      let price;
+      before(async () => {
+        const resp = await client.query(`
+        select price
+        from book
+        order by price
+        limit 1
+        offset 1 
+        `);
+        price = resp.rows[0].price;
+      });
+
+      it('Selected price is equal to second lowest price', (done) => {
+        chai
+          .request(app)
+          .get(`/book?sortBy=price&offset=1&limit=1`)
+          .end((_err, res) => {
+            expect(res.body[0].price).to.equal(price);
             done();
           });
       });
