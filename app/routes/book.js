@@ -1,6 +1,26 @@
+const InvalidArgumentError = require('../error');
+const { getBooks } = require('../models/book');
+
 const router = require('express').Router();
 
-router.get('/', (req, res) => {});
+router.get('/', async (req, res) => {
+  const { limit, offset, sortBy } = req.query;
+  const desc = req.query.desc !== undefined ? true : false;
+
+  let books;
+  try {
+    books = await getBooks({ limit, offset, sortBy, desc });
+  } catch (e) {
+    console.log(e);
+    if (e instanceof InvalidArgumentError)
+      return res.status(400).json({ message: e.message });
+    return res.sendStatus(500);
+  }
+
+  if (books === undefined) return res.sendStatus(500);
+
+  res.json(books);
+});
 
 router.get('/:bookId', (req, res) => {});
 
